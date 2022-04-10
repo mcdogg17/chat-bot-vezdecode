@@ -75,11 +75,12 @@ def write_message(user_id, message, keyboard=None):
     if keyboard:
         for event in longpoll.listen():
             if event.type == VkEventType.MESSAGE_NEW:
-                if event.text == 'Показать ТОП-9':
-                    top_9_memes(user_id)
-                    break
-                else:
-                    break
+                if event.to_me:
+                    if event.text == 'Показать ТОП-9':
+                        top_9_memes(user_id)
+                        break
+                    else:
+                        break
 
 
 token = "01dec4449afed1f0a14aa494c931e53e3e5dfefd8c64de3aa003e4d7318026ab23ef8a530b91db8d0b7cf"
