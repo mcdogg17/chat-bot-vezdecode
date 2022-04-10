@@ -51,6 +51,7 @@ def send_memes(user_id, photo):
         if event.type == VkEventType.MESSAGE_NEW:
             response = event.text
             response = response.lower()
+
             if response == 'лайк':
                 JSON_PHOTO[photo][0][0] += 1
                 JSON_PHOTO[photo][1].append(user_id)
@@ -63,7 +64,7 @@ def send_memes(user_id, photo):
         json.dump(JSON_PHOTO, file)
 
 
-def write_message(user_id, message, keyboard=None):
+def write_message(user_id, message, keyboard=None, q=False):
     random_id = round(random.random() * 10 ** 9)
     post = {
         'user_id': user_id,
@@ -72,7 +73,7 @@ def write_message(user_id, message, keyboard=None):
         'keyboard': keyboard
     }
     vk_group.method('messages.send', post)
-    if keyboard:
+    if keyboard and not q:
         for event in longpoll.listen():
             if event.type == VkEventType.MESSAGE_NEW:
                 if event.to_me:
@@ -106,7 +107,6 @@ longpoll = VkLongPoll(vk_group)
 for event in longpoll.listen():
     if event.type == VkEventType.MESSAGE_NEW:
         response = event.text
-        print(event.attachments)
         response = response.lower()
         if response == 'привет':
             write_message(event.user_id, 'Привет вездекодерам!')
@@ -114,7 +114,7 @@ for event in longpoll.listen():
             state = 1
             write_message(event.user_id, 'Ты программист?', create_keyboard({'Да': [VkKeyboardColor.POSITIVE],
                                                                              'Нет': [VkKeyboardColor.NEGATIVE]}, False,
-                                                                            False))
+                                                                            False), q=True)
             for event in longpoll.listen():
                 if event.type == VkEventType.MESSAGE_NEW:
                     if state == 1 and (event.text == 'Да' or event.text == 'Нет'):
@@ -122,43 +122,43 @@ for event in longpoll.listen():
                         write_message(event.user_id, 'вопрос 2?', create_keyboard({'Ответ 1': [VkKeyboardColor.PRIMARY],
                                                                                    'Ответ 2': [
                                                                                        VkKeyboardColor.PRIMARY]},
-                                                                                  False, True))
+                                                                                  False, True), q=True)
                     elif state == 2 and (event.text == 'Ответ 1' or event.text == 'Ответ 2'):
                         state += 1
                         write_message(event.user_id, 'вопрос 3?',
                                       create_keyboard({'Ответ 3': [VkKeyboardColor.POSITIVE],
                                                        'Ответ 4': [VkKeyboardColor.PRIMARY]},
-                                                      True, False))
+                                                      True, False), q=True)
                     elif state == 3 and (event.text == 'Ответ 3' or event.text == 'Ответ 4'):
                         state += 1
                         write_message(event.user_id, 'вопрос 4?',
                                       create_keyboard({'Ответ 5': [VkKeyboardColor.SECONDARY],
                                                        'Ответ 6': [VkKeyboardColor.SECONDARY]},
-                                                      True, True))
+                                                      True, True), q=True)
                     elif state == 4 and (event.text == 'Ответ 5' or event.text == 'Ответ 6'):
                         state += 1
                         write_message(event.user_id, 'вопрос 5?',
                                       create_keyboard({'Ответ 7': [VkKeyboardColor.NEGATIVE],
                                                        'Ответ 8': [VkKeyboardColor.SECONDARY]},
-                                                      False, False))
+                                                      False, False), q=True)
                     elif state == 5 and (event.text == 'Ответ 7' or event.text == 'Ответ 8'):
                         state += 1
                         write_message(event.user_id, 'вопрос 6?', create_keyboard({'Ответ 9': [VkKeyboardColor.PRIMARY],
                                                                                    'Ответ 10': [
                                                                                        VkKeyboardColor.NEGATIVE]},
-                                                                                  False, False))
+                                                                                  False, False), q=True)
                     elif state == 6 and (event.text == 'Ответ 9' or event.text == 'Ответ 10'):
                         state += 1
                         write_message(event.user_id, 'вопрос 7?',
                                       create_keyboard({'Ответ 11': [VkKeyboardColor.PRIMARY],
                                                        'Ответ 12': [VkKeyboardColor.PRIMARY]},
-                                                      False, False))
+                                                      False, False), q=True)
                     elif state == 7 and (event.text == 'Ответ 11' or event.text == 'Ответ 12'):
                         state += 1
                         write_message(event.user_id, 'вопрос 8?',
                                       create_keyboard({'Ответ 13': [VkKeyboardColor.NEGATIVE],
                                                        'Ответ 14': [VkKeyboardColor.SECONDARY]},
-                                                      False, False))
+                                                      False, False), q=True)
                         break
         elif response.lower() == 'мем':
             while True:
@@ -177,3 +177,4 @@ for event in longpoll.listen():
                 if event.user_id in JSON_PHOTO[elem][1]:
                     count += 1
             write_message(event.user_id, f'Вы оценили {count} мемов', keyboard.get_keyboard())
+
